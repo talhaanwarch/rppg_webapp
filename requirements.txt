@@ -5,6 +5,6 @@ numpy==1.19.5
 opencv-python-headless==4.5.1.48
 psycopg2==2.8.6
 pytz==2021.1
-scipy==1.6.1
+scipy==1.5.4
 sqlparse==0.4.1
 whitenoise==5.2.0
