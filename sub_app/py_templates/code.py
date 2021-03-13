@@ -79,7 +79,7 @@ def patch_extract(path):
             patches_head.append(forhead)
       else: 
           break
-
+    cap.release()
     
     min_width=min([len(i) for i in patches_head])
     patchesfeq=[i[0:min_width] for i in patches_head]
@@ -135,12 +135,12 @@ def heart_rate(patch_arr):
                     H[m:n] = H[m:n] + (h-np.mean(h))/np.std(h)
 
         hr_fourier_pos = fourier_analysis(H, fps)
-        #print(hr_fourier_pos*60)
+        print(hr_fourier_pos*60)
         hr_fourier.append(hr_fourier_pos*60)
 
     print('calculated mean', np.mean(hr_fourier))
     print('calculated std', np.std(hr_fourier))
-    return np.mean(hr_fourier)
+    return hr_fourier
 
 # print('ground mean', np.mean([82,92,90,88,81]))
 # print('ground std', np.std([82,86,86,91,83]))

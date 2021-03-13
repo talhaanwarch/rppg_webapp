@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from .form import VideoForm
 from .py_templates import code
+import numpy as np
 # Create your views here.
 
 
@@ -17,7 +18,8 @@ def home(request):
 			patches=code.patch_extract(initial_obj.file.url)
 			hr=code.heart_rate(patches)
 			print('form saved')
-		return render(request,'home.html',{"prints":hr,'form':form})
+		return render(request,'home.html',{"prints_mean":np.mean(hr),
+			'prints':hr,'form':form})
 	else:
 		form=VideoForm()
 		return render(request,'home.html',{'form':form})
