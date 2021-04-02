@@ -9,6 +9,8 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 
     <title>rPPG</title>
+    {% load static %}
+
   </head>
   <body>
   	<br>
@@ -18,13 +20,26 @@
 		{{ form.as_p }}  
 		<button type="submit">Upload</button>  
 	</form>  
-	
-    {% for hr in prints %}
-    	{{ hr }} <br>
-    {% endfor %}
-    <br>
-    mean of hear rate {{ prints_mean }}
+	{% if prints_hr %}
+    {{ prints_hr }}
+  {% endif %}
+
+  <h3>Instruction</h3>
+  <ol>
+    <li>Please enter your name and manually calculated heart rate</li>
+    <li>Please record 30 second video</li>
+    <li>Kindly make sure there is enough light in room</li>
+    <li>Try to make video without moving camera or face</li>
+    <li>Full face should be captured in video, please check reference image below</li>
+  </ol>
+  <img src="{% static 'image.jpeg' %}" height="250">
+
     </div>
+
+
+  
+
+
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>

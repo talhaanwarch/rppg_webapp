@@ -47,6 +47,8 @@ def patch_extract(path):
     if (cap.isOpened()== False): 
       print("Error opening video stream or file")
 
+    fourcc = cv2.VideoWriter_fourcc(*'XVID')
+    out = cv2.VideoWriter('sub_app/media/video/output.mp4',fourcc, 20.0, (720,405))
     start=time()  
     # Read until video is completed
     while(cap.isOpened()):
@@ -69,28 +71,40 @@ def patch_extract(path):
             frame=cv2.resize(frame, dim, interpolation = cv2.INTER_AREA)
 
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        faces = face_cascade.detectMultiScale(gray, 1.3, 5)
+        faces = face_cascade.detectMultiScale(gray,1.3, 5)
+        cl=60#cheeck length
+        fh=6#forhead from top to
         for (x,y,w,h) in faces:
-            img = cv2.rectangle(frame,(x+w//2-50,y+10),(x+w//2+50,y+h//4-10),(255,0,0),2)
-            img = cv2.rectangle(img,(x+w//2-50,y+h//2+40),(x+w//2+50,y+h//2-15),(255,0,0),2)
-            roi_gray = gray[y:y+h, x:x+w]
-            forhead = img[y+10:y+h//4-10, x+w//2-50:x+w//2+50]
-            patches_cheeck.append(img[y+h//2-15:y+h//2+40, x+w//2-50:x+w//2+50])
-            patches_head.append(forhead)
+            #img = cv2.rectangle(frame,(x+w//2-cl,y),(x+w//2+cl,y+(h//fh)),(255,0,0),2)#forehead
+            img = cv2.rectangle(frame,(x+w//2-cl,y+h//2+40),(x+w//2+cl,y+h//2-15),(255,0,0),2)#cheeks
+            #roi_gray = gray[y:y+h, x:x+w]
+            #patches_head.append(img[y:y+(h//fh), x+w//2-cl:x+w//2+cl])
+            patches_cheeck.append(frame[y+h//2-15:y+h//2+40, x+w//2-cl:x+w//2+cl])
+
+
+        out.write(frame)
+
       else: 
           break
     cap.release()
-    
-    min_width=min([len(i) for i in patches_head])
-    patchesfeq=[i[0:min_width] for i in patches_head]
+    out.release()
 
-    patches_cheeck_eq=[i[0:min_width] for i in patches_cheeck]
+    #head #remove frame have less height than average 
+    #patch_len=np.mean([len(i) for i in patches_head])
+    #patches_head=[i for i in patches_head if len(i) > patch_len-5]
 
-    patch_arr=np.mean([patchesfeq,patches_cheeck_eq],axis=0)
+	#cheeck #remove frame have less length than average 
+    patch_len=np.mean([i.shape[1] for i in patches_cheeck])
+    patches_cheeck=[i for i in patches_cheeck if len(i) < patch_len-5]
 
-    patch_arr=patch_arr[0:len(patch_arr)-len(patch_arr)%100,:,:,:]
-    print(time()-start)
-    return patch_arr
+	#now make both equal length
+    # min_len=min(len(patches_head),len(patches_cheeck))
+    # patches_head=patches_head[0:min_len]
+    # patches_cheeck=patches_cheeck[0:min_len]
+    # patch_arr=np.mean([patches_head,patches_cheeck],axis=0)
+    patches_cheeck=np.array(patches_cheeck)
+    patches_cheeck=patches_cheeck[0:len(patches_cheeck)-len(patches_cheeck)%100,:,:,:]
+    return patches_cheeck
 
 
 
@@ -98,7 +112,12 @@ def patch_extract(path):
 #make all pathces of equal size
 
 def heart_rate(patch_arr):
-    o=5
+    if len(patch_arr)<200:
+        o=1
+    elif len(patch_arr)>200 and len(patch_arr)<600:
+        o=2
+    else:
+        o=3
     hr_fourier=[]
     for p in range(0,len(patch_arr),len(patch_arr)//o):
         patch_select=patch_arr[p:p+len(patch_arr)//o]
@@ -135,7 +154,6 @@ def heart_rate(patch_arr):
                     H[m:n] = H[m:n] + (h-np.mean(h))/np.std(h)
 
         hr_fourier_pos = fourier_analysis(H, fps)
-        print(hr_fourier_pos*60)
         hr_fourier.append(hr_fourier_pos*60)
 
     print('calculated mean', np.mean(hr_fourier))
